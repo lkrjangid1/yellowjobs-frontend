@@ -25,7 +25,6 @@ import { FiShare2 as ShareIcon } from 'react-icons/fi'
 import { FiBookmark as SaveIcon } from 'react-icons/fi'
 
 import LoginModal from './login-modal'
-import LinkCopiedModal from './link-copied-modal'
 import { API_URL } from 'lib/api'
 const FEEDBACK_URL = API_URL + '/api/feedback'
 export default function TweetList() {
@@ -33,16 +32,8 @@ export default function TweetList() {
   const [pageNo, setPageNo] = useState(1)
   const { query } = useRouter()
   const { data, error, size, setSize, isReachingEnd } = useTweets({ query })
-  const {
-    isOpen: isOpenLoginModal,
-    onOpen: onOpenLoginModal,
-    onClose: onCloseLoginModal,
-  } = useDisclosure()
-  const {
-    isOpen: isOpenLinkCopiedModal,
-    onOpen: onOpenLinkCopiedModal,
-    onClose: onCloseLinkCopiedModal,
-  } = useDisclosure()
+  const { isOpen, onOpen, onClose } = useDisclosure()
+  // const data = _data[0]
   const toast = useToast()
   if (error)
     return (
@@ -75,7 +66,7 @@ export default function TweetList() {
 
   const handleSaveClick = (tweetObj) => {
     if (!session) {
-      return onOpenLoginModal()
+      return onOpen()
     } else {
       const requestOptions = {
         method: 'POST',
@@ -142,18 +133,12 @@ export default function TweetList() {
                         size="sm"
                         variant="outline"
                         icon={<ShareIcon />}
-                        onClick={async () => {
+                        onClick={() => {
                           if (navigator.share) {
                             navigator.share({
-                              text: `Hey, I came across this remote opportunity that might be relevant for you.\n`
-                              + `Do check it out and other great remote opportunities at YellowJobs!\n`,
+                              text: `Check out this job I found on yellowjobs.org\n`,
                               url: tweetObj.tweet_url,
                             })
-                          } else if (navigator.clipboard) {
-                            await navigator.clipboard.writeText(
-                              tweetObj.tweet_url
-                            )
-                            onOpenLinkCopiedModal()
                           }
 
                           const requestOptions = {
@@ -228,15 +213,7 @@ export default function TweetList() {
           >
             Load More
           </Button>
-          <LoginModal
-            isOpen={isOpenLoginModal}
-            onClose={onCloseLoginModal}
-            action="saveTweet"
-          />
-          <LinkCopiedModal
-            isOpen={isOpenLinkCopiedModal}
-            onClose={onCloseLinkCopiedModal}
-          />
+          <LoginModal isOpen={isOpen} onClose={onClose} action="saveTweet" />
         </Container>
       </Box>
     )
